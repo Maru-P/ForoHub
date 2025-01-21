@@ -1,0 +1,80 @@
+package com.maru.foro.domain.respuesta;
+
+import java.time.LocalDateTime;
+
+import com.maru.foro.domain.respuesta.dto.ActualizarRespuestaDTO;
+import com.maru.foro.domain.respuesta.dto.CrearRespuestaDTO;
+import com.maru.foro.domain.topico.Topico;
+import com.maru.foro.domain.usuario.Usuario;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "respuestas")
+@Entity(name = "Respuesta")
+@EqualsAndHashCode(of = "id")
+public class Respuesta {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String mensaje;
+
+    @Column(name="fecha_creacion")
+    private LocalDateTime fechaCreacion;
+
+    @Column(name="ultima_actualizacion")
+    private LocalDateTime ultimaActualizacion;
+
+    private Boolean solucion;
+    private Boolean borrado;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id")
+    private Usuario usuario;
+
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name="topico_id")
+    private Topico topico;
+
+    public Respuesta(CrearRespuestaDTO crearRespuestaDTO, Usuario usuario, Topico topico) {
+        this.mensaje = crearRespuestaDTO.mensaje();
+        this.fechaCreacion = LocalDateTime.now();
+        this.ultimaActualizacion = LocalDateTime.now();
+        this.solucion = false;
+        this.borrado = false;
+        this.usuario = usuario;
+        this.topico = topico;
+    }
+
+    public void actualizarRespuesta(ActualizarRespuestaDTO actualizarRespuestaDTO){
+        if(actualizarRespuestaDTO.mensaje() != null){
+            this.mensaje = actualizarRespuestaDTO.mensaje();
+        }
+        if (actualizarRespuestaDTO.solucion() != null){
+            this.solucion = actualizarRespuestaDTO.solucion();
+        }
+        this.ultimaActualizacion = LocalDateTime.now();
+    }
+
+    public void eliminarRespuesta(){
+        this.borrado = true;
+    }
+}
